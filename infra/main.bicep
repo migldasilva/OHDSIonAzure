@@ -91,6 +91,9 @@ param atlasUsersList string
 @description('Enables local access for debugging.')
 param localDebug bool = false
 
+@description('The virtual network address prefix.')
+param addressPrefix string = '192.168.49.0/24'
+
 var tenantId = subscription().tenantId
 
 @description('Creates the app service plan')
@@ -145,6 +148,16 @@ resource keyVaultDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-0
 }
 
 @description('Creates the database server, users and groups required for ohdsi webapi')
+module atlasVirtualNetwork 'atlas_virtual_network.bicep' = {
+  name: 'atlasVirtualNetwork'
+  params: {
+    location: location
+    suffix: suffix
+    addressPrefix: addressPrefix
+  }
+}
+
+@description('Creates the database server, users and groups required for ohdsi webapi')
 module atlasDatabase 'atlas_database.bicep' = {
   name: 'atlasDatabase'
   params: {
@@ -158,7 +171,13 @@ module atlasDatabase 'atlas_database.bicep' = {
     postgresWebapiAppPassword: postgresWebapiAppPassword
     localDebug: localDebug
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    privateDNSZoneId: atlasVirtualNetwork.outputs.privateDNSZoneID
+    postgresVirtualSubnetId: atlasVirtualNetwork.outputs.postgresVirtualSubnetId
+    //virtualNetworkId: atlasVirtualNetwork.outputs.virtualNetworkId
   }
+  dependsOn: [
+    atlasVirtualNetwork
+  ]
 }
 
 @description('Creates the ohdsi webapi')

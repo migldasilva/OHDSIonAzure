@@ -12,6 +12,9 @@ param postgresWebapiAppPassword string
 @description('Enables local access for debugging.')
 param localDebug bool = false
 param logAnalyticsWorkspaceId string
+param privateDNSZoneId string
+param postgresVirtualSubnetId string
+//param virtualNetworkId string
 
 var postgresAdminUsername = 'postgres_admin'
 var postgresWebapiAdminUsername = 'ohdsi_admin_user'
@@ -21,6 +24,7 @@ var postgresWebapiAppRole = 'ohdsi_app'
 var postgresWebApiDatabaseName = 'atlas_webapi_db'
 var postgresSchemaName = 'webapi'
 var postgresVersion = '14'
+var privateEndpointName = 'pe-psql-${suffix}'
 
 var logCategories = ['PostgreSQLLogs']
 // these cost extra.
@@ -73,6 +77,32 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' =
       backupRetentionDays: 7
       geoRedundantBackup: 'Disabled'
     }
+    network: {
+      delegatedSubnetResourceId: postgresVirtualSubnetId
+      privateDnsZoneArmResourceId: privateDNSZoneId
+    }
+  }
+}
+
+// Assign the private endpoit to the PostgreSQL server
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
+  name: privateEndpointName
+  location: location
+  properties: {
+    subnet: {
+      id: postgresVirtualSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: privateEndpointName
+        properties: {
+          privateLinkServiceId: postgresServer.id
+          groupIds: [
+            'sqlServer'
+          ]
+        }
+      }
+    ]
   }
 }
 
