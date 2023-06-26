@@ -1,6 +1,6 @@
 param location string
 param suffix string
-@description('Enables local access for debugging.')
+@description('The address space for this Virtual Network.')
 param addressPrefix string
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
