@@ -14,6 +14,7 @@ param localDebug bool = false
 param logAnalyticsWorkspaceId string
 param privateDNSZoneId string
 param postgresVirtualSubnetId string
+param privateDNSZoneName string
 //param virtualNetworkId string
 
 var postgresAdminUsername = 'postgres_admin'
@@ -101,6 +102,19 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
             'sqlServer'
           ]
         }
+      }
+    ]
+  }
+}
+
+// Add a DNS A record for the PSQL Flexible Server
+resource privateDNSZoneRecordA 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
+  name: '${privateDNSZoneName}/psql-${suffix}'
+  properties: {
+    ttl: 30
+    aRecords: [
+      {
+        ipv4Address: privateEndpoint.properties.ipConfigurations[0].properties.privateIPAddress
       }
     ]
   }

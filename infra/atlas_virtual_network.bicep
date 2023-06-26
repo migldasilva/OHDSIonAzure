@@ -71,3 +71,4 @@ resource privateDNSZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLin
 output privateDNSZoneID string = privateDNSZone.id
 output postgresVirtualSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'PostgreSQL')
 output virtualNetworkId string = virtualNetwork.id
+output privateDNSZoneName string = privateDNSZone.name
