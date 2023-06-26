@@ -173,6 +173,7 @@ module atlasDatabase 'atlas_database.bicep' = {
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
     privateDNSZoneId: atlasVirtualNetwork.outputs.privateDNSZoneID
     postgresVirtualSubnetId: atlasVirtualNetwork.outputs.postgresVirtualSubnetId
+    privateDNSZoneName: atlasVirtualNetwork.outputs.privateDNSZoneName
     //virtualNetworkId: atlasVirtualNetwork.outputs.virtualNetworkId
   }
   dependsOn: [

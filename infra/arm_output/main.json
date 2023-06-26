@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "13789195741373810154"
+      "templateHash": "2719092342564585117"
     }
   },
   "parameters": {
@@ -398,7 +398,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "3737419587522066495"
+              "templateHash": "3194740979234333372"
             }
           },
           "parameters": {
@@ -500,6 +500,10 @@
             "virtualNetworkId": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
+            },
+            "privateDNSZoneName": {
+              "type": "string",
+              "value": "private.postgres.database.azure.com"
             }
           }
         }
@@ -553,6 +557,9 @@
           },
           "postgresVirtualSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.postgresVirtualSubnetId.value]"
+          },
+          "privateDNSZoneName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.privateDNSZoneName.value]"
           }
         },
         "template": {
@@ -562,7 +569,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "17820312669075901238"
+              "templateHash": "10939177169254574171"
             }
           },
           "parameters": {
@@ -604,6 +611,9 @@
               "type": "string"
             },
             "postgresVirtualSubnetId": {
+              "type": "string"
+            },
+            "privateDNSZoneName": {
               "type": "string"
             }
           },
@@ -698,6 +708,22 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('psql-{0}', parameters('suffix')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/A",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/psql-{1}', parameters('privateDNSZoneName'), parameters('suffix'))]",
+              "properties": {
+                "ttl": 30,
+                "aRecords": [
+                  {
+                    "ipv4Address": "[reference(resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName')), '2021-05-01').ipConfigurations[0].properties.privateIPAddress]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName'))]"
               ]
             },
             {
