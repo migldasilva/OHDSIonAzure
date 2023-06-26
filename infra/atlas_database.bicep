@@ -86,7 +86,7 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' =
 }
 
 // Assign the private endpoit to the PostgreSQL server
-resource privateEndpoint 'Microsoft.Network/privateEndpoints@2020-03-01' = {
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = {
   name: privateEndpointName
   location: location
   properties: {

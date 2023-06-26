@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "2719092342564585117"
+      "templateHash": "16252124430272024691"
     }
   },
   "parameters": {
@@ -569,7 +569,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "10939177169254574171"
+              "templateHash": "774829188927543958"
             }
           },
           "parameters": {
@@ -687,7 +687,7 @@
             },
             {
               "type": "Microsoft.Network/privateEndpoints",
-              "apiVersion": "2021-05-01",
+              "apiVersion": "2022-07-01",
               "name": "[variables('privateEndpointName')]",
               "location": "[parameters('location')]",
               "properties": {
@@ -718,7 +718,7 @@
                 "ttl": 30,
                 "aRecords": [
                   {
-                    "ipv4Address": "[reference(resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName')), '2021-05-01').ipConfigurations[0].properties.privateIPAddress]"
+                    "ipv4Address": "[reference(resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName')), '2022-07-01').ipConfigurations[0].properties.privateIPAddress]"
                   }
                 ]
               },
