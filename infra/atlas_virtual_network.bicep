@@ -3,6 +3,9 @@ param suffix string
 @description('The address space for this Virtual Network.')
 param addressPrefix string
 
+// We calculate the subnets from the given address prefix
+var subnetAddressPrefixes = [for i in range(0, 8): cidrSubnet(addressPrefix, 27, i)]
+
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   name: 'vnet-${suffix}'
   location: location
@@ -16,7 +19,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
       {
         name: 'WebApp'
         properties: {
-          addressPrefix: '192.168.49.0/27'
+          addressPrefix: subnetAddressPrefixes[0]
           delegations: [
             {
               name: 'WebAppDelegation'
@@ -30,13 +33,13 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
       {
         name: 'WebAppOutbound'
         properties: {
-          addressPrefix: '192.168.49.32/27'          
+          addressPrefix: subnetAddressPrefixes[1]
         }
       }
       {
         name: 'PostgreSQL'
         properties: {
-          addressPrefix: '192.168.49.64/27'
+          addressPrefix: subnetAddressPrefixes[2]
           delegations: [
             {
               name: 'PostgreSQLDelegation'
@@ -58,7 +61,7 @@ resource privateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
 
 resource privateDNSZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   parent: privateDNSZone
-  name: 'private-link-psql-${suffix}'
+  name: 'private-link-${suffix}'
   location: 'global'
   properties: {
     registrationEnabled: true

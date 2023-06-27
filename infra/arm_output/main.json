@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "16252124430272024691"
+      "templateHash": "9109594453833061810"
     }
   },
   "parameters": {
@@ -165,7 +165,7 @@
       "type": "string",
       "defaultValue": "192.168.49.0/24",
       "metadata": {
-        "description": "The virtual network address prefix."
+        "description": "The virtual network address prefix. Please provide a /24 CIRD prefix."
       }
     }
   },
@@ -398,7 +398,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "3194740979234333372"
+              "templateHash": "1070093181555227333"
             }
           },
           "parameters": {
@@ -414,6 +414,15 @@
                 "description": "The address space for this Virtual Network."
               }
             }
+          },
+          "variables": {
+            "copy": [
+              {
+                "name": "subnetAddressPrefixes",
+                "count": "[length(range(0, 8))]",
+                "input": "[cidrSubnet(parameters('addressPrefix'), 27, range(0, 8)[copyIndex('subnetAddressPrefixes')])]"
+              }
+            ]
           },
           "resources": [
             {
@@ -431,7 +440,7 @@
                   {
                     "name": "WebApp",
                     "properties": {
-                      "addressPrefix": "192.168.49.0/27",
+                      "addressPrefix": "[variables('subnetAddressPrefixes')[0]]",
                       "delegations": [
                         {
                           "name": "WebAppDelegation",
@@ -445,13 +454,13 @@
                   {
                     "name": "WebAppOutbound",
                     "properties": {
-                      "addressPrefix": "192.168.49.32/27"
+                      "addressPrefix": "[variables('subnetAddressPrefixes')[1]]"
                     }
                   },
                   {
                     "name": "PostgreSQL",
                     "properties": {
-                      "addressPrefix": "192.168.49.64/27",
+                      "addressPrefix": "[variables('subnetAddressPrefixes')[2]]",
                       "delegations": [
                         {
                           "name": "PostgreSQLDelegation",
@@ -474,7 +483,7 @@
             {
               "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
               "apiVersion": "2020-06-01",
-              "name": "[format('{0}/{1}', 'private.postgres.database.azure.com', format('private-link-psql-{0}', parameters('suffix')))]",
+              "name": "[format('{0}/{1}', 'private.postgres.database.azure.com', format('private-link-{0}', parameters('suffix')))]",
               "location": "global",
               "properties": {
                 "registrationEnabled": true,

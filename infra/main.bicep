@@ -91,7 +91,7 @@ param atlasUsersList string
 @description('Enables local access for debugging.')
 param localDebug bool = false
 
-@description('The virtual network address prefix.')
+@description('The virtual network address prefix. Please provide a /24 CIRD prefix.')
 param addressPrefix string = '192.168.49.0/24'
 
 var tenantId = subscription().tenantId
