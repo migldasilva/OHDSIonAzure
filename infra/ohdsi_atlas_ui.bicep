@@ -3,7 +3,7 @@ param suffix string
 param appServicePlanId string
 param ohdsiWebApiUrl string
 param logAnalyticsWorkspaceId string
-param virtualNetworkId string
+param webAppVirtualSubnetId string
 
 var dockerRegistryServer = 'https://index.docker.io/v1'
 var dockerImageName = 'ohdsi/atlas'
@@ -116,7 +116,7 @@ resource uiWebApp 'Microsoft.Web/sites@2022-03-01' = {
         }
       ]
     }
-    virtualNetworkSubnetId: virtualNetworkId
+    virtualNetworkSubnetId: webAppVirtualSubnetId
   }
   dependsOn: [
     deploymentOhdsiAtlasConfigScript

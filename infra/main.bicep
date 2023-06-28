@@ -194,7 +194,7 @@ module ohdsiWebApiWebapp 'ohdsi_webapi.bicep' = {
     postgresWebapiAppUsername: atlasDatabase.outputs.postgresWebapiAppUsername
     postgresWebApiSchemaName: atlasDatabase.outputs.postgresSchemaName
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
-    virtualNetworkId: atlasVirtualNetwork.outputs.virtualNetworkId
+    webAppVirtualSubnetId: atlasVirtualNetwork.outputs.webAppVirtualSubnetId
   }
   dependsOn: [
     atlasDatabase
@@ -232,7 +232,7 @@ module atlasUI 'ohdsi_atlas_ui.bicep' = {
     appServicePlanId: appServicePlan.id
     ohdsiWebApiUrl: ohdsiWebApiWebapp.outputs.ohdsiWebapiUrl
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
-    virtualNetworkId: atlasVirtualNetwork.outputs.virtualNetworkId
+    webAppVirtualSubnetId: atlasVirtualNetwork.outputs.webAppVirtualSubnetId
   }
   dependsOn: [
     ohdsiWebApiWebapp
