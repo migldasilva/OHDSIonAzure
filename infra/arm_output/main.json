@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "1859673055299623690"
+      "templateHash": "4958584751720834529"
     }
   },
   "parameters": {
@@ -277,7 +277,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "1650192659806026650"
+              "templateHash": "13899319149965621810"
             }
           },
           "parameters": {
@@ -400,6 +400,10 @@
             "postgresVirtualSubnetId": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', format('vnet-{0}', parameters('suffix')), 'PostgreSQL')]"
+            },
+            "webAppVirtualSubnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', format('vnet-{0}', parameters('suffix')), 'WebApp')]"
             },
             "virtualNetworkId": {
               "type": "string",
@@ -731,8 +735,8 @@
           "logAnalyticsWorkspaceId": {
             "value": "[resourceId('Microsoft.OperationalInsights/workspaces', format('log-{0}', parameters('suffix')))]"
           },
-          "virtualNetworkId": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.virtualNetworkId.value]"
+          "webAppVirtualSubnetId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppVirtualSubnetId.value]"
           }
         },
         "template": {
@@ -742,7 +746,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "6115546318105631482"
+              "templateHash": "11248299492909316590"
             }
           },
           "parameters": {
@@ -779,7 +783,7 @@
             "logAnalyticsWorkspaceId": {
               "type": "string"
             },
-            "virtualNetworkId": {
+            "webAppVirtualSubnetId": {
               "type": "string"
             }
           },
@@ -997,7 +1001,7 @@
                     }
                   ]
                 },
-                "virtualNetworkSubnetId": "[parameters('virtualNetworkId')]"
+                "virtualNetworkSubnetId": "[parameters('webAppVirtualSubnetId')]"
               },
               "identity": {
                 "type": "UserAssigned",
@@ -1245,8 +1249,8 @@
           "logAnalyticsWorkspaceId": {
             "value": "[resourceId('Microsoft.OperationalInsights/workspaces', format('log-{0}', parameters('suffix')))]"
           },
-          "virtualNetworkId": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.virtualNetworkId.value]"
+          "webAppVirtualSubnetId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppVirtualSubnetId.value]"
           }
         },
         "template": {
@@ -1256,7 +1260,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "9262226077013120335"
+              "templateHash": "2941599539758019028"
             }
           },
           "parameters": {
@@ -1275,7 +1279,7 @@
             "logAnalyticsWorkspaceId": {
               "type": "string"
             },
-            "virtualNetworkId": {
+            "webAppVirtualSubnetId": {
               "type": "string"
             }
           },
@@ -1405,7 +1409,7 @@
                     }
                   ]
                 },
-                "virtualNetworkSubnetId": "[parameters('virtualNetworkId')]"
+                "virtualNetworkSubnetId": "[parameters('webAppVirtualSubnetId')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Resources/deploymentScripts', 'deployment-ohdsi-atlas-config-file')]",
