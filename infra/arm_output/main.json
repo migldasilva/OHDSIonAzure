@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "9109594453833061810"
+      "templateHash": "10848405450650567187"
     }
   },
   "parameters": {
@@ -398,7 +398,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "1070093181555227333"
+              "templateHash": "1650192659806026650"
             }
           },
           "parameters": {
@@ -479,6 +479,22 @@
               "apiVersion": "2020-06-01",
               "name": "private.postgres.database.azure.com",
               "location": "global"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/A",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/{1}', 'private.postgres.database.azure.com', format('psql-{0}', parameters('suffix')))]",
+              "properties": {
+                "ttl": 30,
+                "aRecords": [
+                  {
+                    "ipv4Address": "[cidrHost(variables('subnetAddressPrefixes')[2], 4)]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', 'private.postgres.database.azure.com')]"
+              ]
             },
             {
               "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
@@ -566,9 +582,6 @@
           },
           "postgresVirtualSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.postgresVirtualSubnetId.value]"
-          },
-          "privateDNSZoneName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.privateDNSZoneName.value]"
           }
         },
         "template": {
@@ -578,7 +591,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "774829188927543958"
+              "templateHash": "5965004359470411638"
             }
           },
           "parameters": {
@@ -621,9 +634,6 @@
             },
             "postgresVirtualSubnetId": {
               "type": "string"
-            },
-            "privateDNSZoneName": {
-              "type": "string"
             }
           },
           "variables": {
@@ -638,7 +648,6 @@
             "postgresWebApiDatabaseName": "atlas_webapi_db",
             "postgresSchemaName": "webapi",
             "postgresVersion": "14",
-            "privateEndpointName": "[format('pe-psql-{0}', parameters('suffix'))]",
             "logCategories": [
               "PostgreSQLLogs"
             ]
@@ -693,47 +702,6 @@
                   "privateDnsZoneArmResourceId": "[parameters('privateDNSZoneId')]"
                 }
               }
-            },
-            {
-              "type": "Microsoft.Network/privateEndpoints",
-              "apiVersion": "2022-07-01",
-              "name": "[variables('privateEndpointName')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "subnet": {
-                  "id": "[parameters('postgresVirtualSubnetId')]"
-                },
-                "privateLinkServiceConnections": [
-                  {
-                    "name": "[variables('privateEndpointName')]",
-                    "properties": {
-                      "privateLinkServiceId": "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('psql-{0}', parameters('suffix')))]",
-                      "groupIds": [
-                        "sqlServer"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', format('psql-{0}', parameters('suffix')))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/privateDnsZones/A",
-              "apiVersion": "2020-06-01",
-              "name": "[format('{0}/psql-{1}', parameters('privateDNSZoneName'), parameters('suffix'))]",
-              "properties": {
-                "ttl": 30,
-                "aRecords": [
-                  {
-                    "ipv4Address": "[reference(resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName')), '2022-07-01').ipConfigurations[0].properties.privateIPAddress]"
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName'))]"
-              ]
             },
             {
               "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",

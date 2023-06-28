@@ -59,6 +59,21 @@ resource privateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   location: 'global'
 }
 
+// Add a DNS A record for the PSQL Flexible Server
+resource privateDNSZoneRecordA 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
+  parent: privateDNSZone
+  name: 'psql-${suffix}'
+  properties: {
+    ttl: 30
+    aRecords: [
+      {
+        // We assigne a static private IP address
+        ipv4Address: cidrHost(subnetAddressPrefixes[2], 4)
+      }
+    ]
+  }
+}
+
 resource privateDNSZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   parent: privateDNSZone
   name: 'private-link-${suffix}'
