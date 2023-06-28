@@ -173,8 +173,6 @@ module atlasDatabase 'atlas_database.bicep' = {
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
     privateDNSZoneId: atlasVirtualNetwork.outputs.privateDNSZoneID
     postgresVirtualSubnetId: atlasVirtualNetwork.outputs.postgresVirtualSubnetId
-    // privateDNSZoneName: atlasVirtualNetwork.outputs.privateDNSZoneName
-    // virtualNetworkId: atlasVirtualNetwork.outputs.virtualNetworkId
   }
   dependsOn: [
     atlasVirtualNetwork
@@ -196,6 +194,7 @@ module ohdsiWebApiWebapp 'ohdsi_webapi.bicep' = {
     postgresWebapiAppUsername: atlasDatabase.outputs.postgresWebapiAppUsername
     postgresWebApiSchemaName: atlasDatabase.outputs.postgresSchemaName
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    virtualNetworkId: atlasVirtualNetwork.outputs.virtualNetworkId
   }
   dependsOn: [
     atlasDatabase
@@ -233,6 +232,7 @@ module atlasUI 'ohdsi_atlas_ui.bicep' = {
     appServicePlanId: appServicePlan.id
     ohdsiWebApiUrl: ohdsiWebApiWebapp.outputs.ohdsiWebapiUrl
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    virtualNetworkId: atlasVirtualNetwork.outputs.virtualNetworkId
   }
   dependsOn: [
     ohdsiWebApiWebapp

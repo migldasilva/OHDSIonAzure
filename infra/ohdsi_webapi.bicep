@@ -12,6 +12,7 @@ param postgresWebapiAppSecret string
 @secure()
 param postgresWebapiAdminSecret string
 param logAnalyticsWorkspaceId string
+param virtualNetworkId string
 
 var dockerRegistryServer = 'https://index.docker.io/v1'
 var dockerImageName = 'ohdsi/webapi'
@@ -222,6 +223,7 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
         }
       ]
     }
+    virtualNetworkSubnetId: virtualNetworkId
   }
   identity: {
     type: 'UserAssigned'

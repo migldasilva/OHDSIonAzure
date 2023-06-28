@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "11796565742221098608"
+      "templateHash": "1859673055299623690"
     }
   },
   "parameters": {
@@ -730,6 +730,9 @@
           },
           "logAnalyticsWorkspaceId": {
             "value": "[resourceId('Microsoft.OperationalInsights/workspaces', format('log-{0}', parameters('suffix')))]"
+          },
+          "virtualNetworkId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.virtualNetworkId.value]"
           }
         },
         "template": {
@@ -739,7 +742,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "16381063749948834920"
+              "templateHash": "6115546318105631482"
             }
           },
           "parameters": {
@@ -774,6 +777,9 @@
               "type": "securestring"
             },
             "logAnalyticsWorkspaceId": {
+              "type": "string"
+            },
+            "virtualNetworkId": {
               "type": "string"
             }
           },
@@ -990,7 +996,8 @@
                       "value": "8080"
                     }
                   ]
-                }
+                },
+                "virtualNetworkSubnetId": "[parameters('virtualNetworkId')]"
               },
               "identity": {
                 "type": "UserAssigned",
@@ -1041,6 +1048,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}', parameters('suffix')))]",
         "[resourceId('Microsoft.Resources/deployments', 'atlasDatabase')]",
+        "[resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork')]",
         "[resourceId('Microsoft.KeyVault/vaults', format('kv-{0}', parameters('suffix')))]",
         "[resourceId('Microsoft.OperationalInsights/workspaces', format('log-{0}', parameters('suffix')))]"
       ],
@@ -1236,6 +1244,9 @@
           },
           "logAnalyticsWorkspaceId": {
             "value": "[resourceId('Microsoft.OperationalInsights/workspaces', format('log-{0}', parameters('suffix')))]"
+          },
+          "virtualNetworkId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.virtualNetworkId.value]"
           }
         },
         "template": {
@@ -1245,7 +1256,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "15901564848532204157"
+              "templateHash": "9262226077013120335"
             }
           },
           "parameters": {
@@ -1262,6 +1273,9 @@
               "type": "string"
             },
             "logAnalyticsWorkspaceId": {
+              "type": "string"
+            },
+            "virtualNetworkId": {
               "type": "string"
             }
           },
@@ -1390,7 +1404,8 @@
                       "value": "8080"
                     }
                   ]
-                }
+                },
+                "virtualNetworkSubnetId": "[parameters('virtualNetworkId')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Resources/deploymentScripts', 'deployment-ohdsi-atlas-config-file')]",
@@ -1428,6 +1443,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}', parameters('suffix')))]",
+        "[resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork')]",
         "[resourceId('Microsoft.OperationalInsights/workspaces', format('log-{0}', parameters('suffix')))]",
         "[resourceId('Microsoft.Resources/deployments', 'ohdsiWebApiWebapp')]"
       ],
