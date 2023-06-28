@@ -149,74 +149,74 @@ resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2
   }
 }
 
-resource deploymentOhdsiWebapiInitScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: 'deployment-ohdsi-webapi-init'
-  location: location
-  kind: 'AzureCLI'
-  properties: {
-    azCliVersion: '2.42.0'
-    timeout: 'PT5M'
-    containerSettings: {
-      containerGroupName: 'deployment-ohdsi-webapi-init'
-    }
-    environmentVariables: [
-      {
-        name: 'MAIN_CONNECTION_STRING'
-        secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresWebApiDatabaseName} user=${postgresAdminUsername} password=${postgresAdminPassword} sslmode=require'
-      }
-      {
-        name: 'OHDSI_ADMIN_CONNECTION_STRING'
-        secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresWebApiDatabaseName} user=${postgresWebapiAdminUsername} password=${postgresWebapiAdminPassword} sslmode=require'
-      }
-      {
-        name: 'DATABASE_NAME'
-        value: postgresWebApiDatabaseName
-      }
-      {
-        name: 'SCHEMA_NAME'
-        value: postgresSchemaName
-      }
-      {
-        name: 'OHDSI_ADMIN_PASSWORD'
-        secureValue: postgresWebapiAdminPassword
-      }
-      {
-        name: 'OHDSI_APP_PASSWORD'
-        secureValue: postgresWebapiAppPassword
-      }
-      {
-        name: 'OHDSI_APP_USERNAME'
-        value: postgresWebapiAppUsername
-      }
-      {
-        name: 'OHDSI_ADMIN_USERNAME'
-        value: postgresWebapiAdminUsername
-      }
-      {
-        name: 'OHDSI_ADMIN_ROLE'
-        value: postgresWebapiAdminRole
-      }
-      {
-        name: 'OHDSI_APP_ROLE'
-        value: postgresWebapiAppRole
-      }
-      {
-        name: 'SQL_ATLAS_USERS'
-        value: loadTextContent('sql/atlas_create_roles_users.sql')
-      }
-      {
-        name: 'SQL_ATLAS_SCHEMA'
-        value: loadTextContent('sql/atlas_create_schema.sql')
-      }
-    ]
-    scriptContent: loadTextContent('scripts/atlas_db_init.sh')
-    cleanupPreference: 'OnSuccess'
-    retentionInterval: 'PT1H'
-  }
-  dependsOn: [
-    postgresDatabase
-  ]
-}
+// resource deploymentOhdsiWebapiInitScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+//   name: 'deployment-ohdsi-webapi-init'
+//   location: location
+//   kind: 'AzureCLI'
+//   properties: {
+//     azCliVersion: '2.42.0'
+//     timeout: 'PT5M'
+//     containerSettings: {
+//       containerGroupName: 'deployment-ohdsi-webapi-init'
+//     }
+//     environmentVariables: [
+//       {
+//         name: 'MAIN_CONNECTION_STRING'
+//         secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresWebApiDatabaseName} user=${postgresAdminUsername} password=${postgresAdminPassword} sslmode=require'
+//       }
+//       {
+//         name: 'OHDSI_ADMIN_CONNECTION_STRING'
+//         secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresWebApiDatabaseName} user=${postgresWebapiAdminUsername} password=${postgresWebapiAdminPassword} sslmode=require'
+//       }
+//       {
+//         name: 'DATABASE_NAME'
+//         value: postgresWebApiDatabaseName
+//       }
+//       {
+//         name: 'SCHEMA_NAME'
+//         value: postgresSchemaName
+//       }
+//       {
+//         name: 'OHDSI_ADMIN_PASSWORD'
+//         secureValue: postgresWebapiAdminPassword
+//       }
+//       {
+//         name: 'OHDSI_APP_PASSWORD'
+//         secureValue: postgresWebapiAppPassword
+//       }
+//       {
+//         name: 'OHDSI_APP_USERNAME'
+//         value: postgresWebapiAppUsername
+//       }
+//       {
+//         name: 'OHDSI_ADMIN_USERNAME'
+//         value: postgresWebapiAdminUsername
+//       }
+//       {
+//         name: 'OHDSI_ADMIN_ROLE'
+//         value: postgresWebapiAdminRole
+//       }
+//       {
+//         name: 'OHDSI_APP_ROLE'
+//         value: postgresWebapiAppRole
+//       }
+//       {
+//         name: 'SQL_ATLAS_USERS'
+//         value: loadTextContent('sql/atlas_create_roles_users.sql')
+//       }
+//       {
+//         name: 'SQL_ATLAS_SCHEMA'
+//         value: loadTextContent('sql/atlas_create_schema.sql')
+//       }
+//     ]
+//     scriptContent: loadTextContent('scripts/atlas_db_init.sh')gg
+//     cleanupPreference: 'OnSuccess'
+//     retentionInterval: 'PT1H'
+//   }
+//   dependsOn: [
+//     postgresDatabase
+//   ]
+// }
 
 resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: postgresServer.name
