@@ -85,28 +85,6 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' =
   }
 }
 
-// Assign the private endpoit to the PostgreSQL server
-// resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = {
-//   name: privateEndpointName
-//   location: location
-//   properties: {
-//     subnet: {
-//       id: postgresVirtualSubnetId
-//     }
-//     privateLinkServiceConnections: [
-//       {
-//         name: privateEndpointName
-//         properties: {
-//           privateLinkServiceId: postgresServer.id
-//           groupIds: [
-//             'sqlServer'
-//           ]
-//         }
-//       }
-//     ]
-//   }
-// }
-
 // // Add a DNS A record for the PSQL Flexible Server
 // resource privateDNSZoneRecordA 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
 //   name: '${privateDNSZoneName}/psql-${suffix}'

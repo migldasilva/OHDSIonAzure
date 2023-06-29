@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "4958584751720834529"
+      "templateHash": "17989780927675693416"
     }
   },
   "parameters": {
@@ -277,7 +277,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "13899319149965621810"
+              "templateHash": "5512286129982062102"
             }
           },
           "parameters": {
@@ -319,7 +319,13 @@
                   {
                     "name": "WebApp",
                     "properties": {
-                      "addressPrefix": "[variables('subnetAddressPrefixes')[0]]",
+                      "addressPrefix": "[variables('subnetAddressPrefixes')[0]]"
+                    }
+                  },
+                  {
+                    "name": "WebAppOutbound",
+                    "properties": {
+                      "addressPrefix": "[variables('subnetAddressPrefixes')[1]]",
                       "delegations": [
                         {
                           "name": "WebAppDelegation",
@@ -328,12 +334,6 @@
                           }
                         }
                       ]
-                    }
-                  },
-                  {
-                    "name": "WebAppOutbound",
-                    "properties": {
-                      "addressPrefix": "[variables('subnetAddressPrefixes')[1]]"
                     }
                   },
                   {
@@ -404,6 +404,10 @@
             "webAppVirtualSubnetId": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', format('vnet-{0}', parameters('suffix')), 'WebApp')]"
+            },
+            "webAppOutboundVirtualSubnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', format('vnet-{0}', parameters('suffix')), 'WebAppOutbound')]"
             },
             "virtualNetworkId": {
               "type": "string",
@@ -737,6 +741,9 @@
           },
           "webAppVirtualSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppVirtualSubnetId.value]"
+          },
+          "webAppOutboundVirtualSubnetId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppOutboundVirtualSubnetId.value]"
           }
         },
         "template": {
@@ -746,7 +753,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "11248299492909316590"
+              "templateHash": "3348702756594113150"
             }
           },
           "parameters": {
@@ -784,6 +791,9 @@
               "type": "string"
             },
             "webAppVirtualSubnetId": {
+              "type": "string"
+            },
+            "webAppOutboundVirtualSubnetId": {
               "type": "string"
             }
           },
@@ -1001,7 +1011,7 @@
                     }
                   ]
                 },
-                "virtualNetworkSubnetId": "[parameters('webAppVirtualSubnetId')]"
+                "virtualNetworkSubnetId": "[parameters('webAppOutboundVirtualSubnetId')]"
               },
               "identity": {
                 "type": "UserAssigned",
@@ -1035,6 +1045,31 @@
                   }
                 ],
                 "workspaceId": "[parameters('logAnalyticsWorkspaceId')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', format('app-ohdsiwebapi-{0}', parameters('suffix')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints",
+              "apiVersion": "2022-07-01",
+              "name": "[format('pe-{0}', format('app-ohdsiwebapi-{0}', parameters('suffix')))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('webAppVirtualSubnetId')]"
+                },
+                "privateLinkServiceConnections": [
+                  {
+                    "name": "[format('pe-{0}', format('app-ohdsiwebapi-{0}', parameters('suffix')))]",
+                    "properties": {
+                      "privateLinkServiceId": "[resourceId('Microsoft.Web/sites', format('app-ohdsiwebapi-{0}', parameters('suffix')))]",
+                      "groupIds": [
+                        "sites"
+                      ]
+                    }
+                  }
+                ]
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', format('app-ohdsiwebapi-{0}', parameters('suffix')))]"
@@ -1251,6 +1286,9 @@
           },
           "webAppVirtualSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppVirtualSubnetId.value]"
+          },
+          "webAppOutboundVirtualSubnetId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppOutboundVirtualSubnetId.value]"
           }
         },
         "template": {
@@ -1260,7 +1298,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "2941599539758019028"
+              "templateHash": "12200703031180864509"
             }
           },
           "parameters": {
@@ -1280,6 +1318,9 @@
               "type": "string"
             },
             "webAppVirtualSubnetId": {
+              "type": "string"
+            },
+            "webAppOutboundVirtualSubnetId": {
               "type": "string"
             }
           },
@@ -1409,7 +1450,7 @@
                     }
                   ]
                 },
-                "virtualNetworkSubnetId": "[parameters('webAppVirtualSubnetId')]"
+                "virtualNetworkSubnetId": "[parameters('webAppOutboundVirtualSubnetId')]"
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Resources/deploymentScripts', 'deployment-ohdsi-atlas-config-file')]",
@@ -1437,6 +1478,31 @@
                   }
                 ],
                 "workspaceId": "[parameters('logAnalyticsWorkspaceId')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', format('app-ohdsiatlas-{0}', parameters('suffix')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints",
+              "apiVersion": "2022-07-01",
+              "name": "[format('pe-{0}', format('app-ohdsiatlas-{0}', parameters('suffix')))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('webAppVirtualSubnetId')]"
+                },
+                "privateLinkServiceConnections": [
+                  {
+                    "name": "[format('pe-{0}', format('app-ohdsiatlas-{0}', parameters('suffix')))]",
+                    "properties": {
+                      "privateLinkServiceId": "[resourceId('Microsoft.Web/sites', format('app-ohdsiatlas-{0}', parameters('suffix')))]",
+                      "groupIds": [
+                        "sites"
+                      ]
+                    }
+                  }
+                ]
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', format('app-ohdsiatlas-{0}', parameters('suffix')))]"

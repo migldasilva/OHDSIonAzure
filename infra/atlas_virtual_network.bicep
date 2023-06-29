@@ -20,6 +20,12 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
         name: 'WebApp'
         properties: {
           addressPrefix: subnetAddressPrefixes[0]
+        }
+      }
+      {
+        name: 'WebAppOutbound'
+        properties: {
+          addressPrefix: subnetAddressPrefixes[1]
           delegations: [
             {
               name: 'WebAppDelegation'
@@ -28,12 +34,6 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
               }
             }
           ]
-        }
-      }
-      {
-        name: 'WebAppOutbound'
-        properties: {
-          addressPrefix: subnetAddressPrefixes[1]
         }
       }
       {
@@ -89,5 +89,6 @@ resource privateDNSZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLin
 output privateDNSZoneID string = privateDNSZone.id
 output postgresVirtualSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'PostgreSQL')
 output webAppVirtualSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'WebApp')
+output webAppOutboundVirtualSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'WebAppOutbound')
 output virtualNetworkId string = virtualNetwork.id
 output privateDNSZoneName string = privateDNSZone.name

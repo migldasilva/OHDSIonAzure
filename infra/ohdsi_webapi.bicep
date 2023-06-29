@@ -13,6 +13,7 @@ param postgresWebapiAppSecret string
 param postgresWebapiAdminSecret string
 param logAnalyticsWorkspaceId string
 param webAppVirtualSubnetId string
+param webAppOutboundVirtualSubnetId string
 
 var dockerRegistryServer = 'https://index.docker.io/v1'
 var dockerImageName = 'ohdsi/webapi'
@@ -223,7 +224,7 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
         }
       ]
     }
-    virtualNetworkSubnetId: webAppVirtualSubnetId
+    virtualNetworkSubnetId: webAppOutboundVirtualSubnetId
   }
   identity: {
     type: 'UserAssigned'
@@ -246,6 +247,28 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
         enabled: true
       }
     }]
+  }
+}
+
+// Assign the private endpoit to the PostgreSQL server
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = {
+  name: 'pe-${webApp.name}'
+  location: location
+  properties: {
+    subnet: {
+      id: webAppVirtualSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'pe-${webApp.name}'
+        properties: {
+          privateLinkServiceId: webApp.id
+          groupIds: [
+            'sites'
+          ]
+        }
+      }
+    ]
   }
 }
 
