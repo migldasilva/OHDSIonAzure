@@ -273,13 +273,13 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = {
   }
 }
 
-resource privatednszonegroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = {
+resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = {
   parent: privateEndpoint
   name: 'privateDnsZoneGroup'
   properties: {
     privateDnsZoneConfigs: [
       {
-        name: 'config'
+        name: 'dns-zone-group-${webApp.name}'
         properties: {
           privateDnsZoneId: privateDNSZoneAzurewebsitesID
         }

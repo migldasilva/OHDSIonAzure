@@ -169,7 +169,7 @@ resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneG
   properties: {
     privateDnsZoneConfigs: [
       {
-        name: 'config'
+        name: 'dns-zone-group-${uiWebApp.name}'
         properties: {
           privateDnsZoneId: privateDNSZoneAzurewebsitesID
         }

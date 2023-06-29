@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "8866054256402933105"
+      "templateHash": "4230515235342710728"
     }
   },
   "parameters": {
@@ -782,7 +782,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "289964917472998855"
+              "templateHash": "15782756446026059633"
             }
           },
           "parameters": {
@@ -1114,7 +1114,7 @@
               "properties": {
                 "privateDnsZoneConfigs": [
                   {
-                    "name": "config",
+                    "name": "[format('dns-zone-group-{0}', format('app-ohdsiwebapi-{0}', parameters('suffix')))]",
                     "properties": {
                       "privateDnsZoneId": "[parameters('privateDNSZoneAzurewebsitesID')]"
                     }
@@ -1122,7 +1122,8 @@
                 ]
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/privateEndpoints', format('pe-{0}', format('app-ohdsiwebapi-{0}', parameters('suffix'))))]"
+                "[resourceId('Microsoft.Network/privateEndpoints', format('pe-{0}', format('app-ohdsiwebapi-{0}', parameters('suffix'))))]",
+                "[resourceId('Microsoft.Web/sites', format('app-ohdsiwebapi-{0}', parameters('suffix')))]"
               ]
             }
           ],
@@ -1351,7 +1352,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "18010638622836673075"
+              "templateHash": "6734623391047492665"
             }
           },
           "parameters": {
@@ -1571,7 +1572,7 @@
               "properties": {
                 "privateDnsZoneConfigs": [
                   {
-                    "name": "config",
+                    "name": "[format('dns-zone-group-{0}', format('app-ohdsiatlas-{0}', parameters('suffix')))]",
                     "properties": {
                       "privateDnsZoneId": "[parameters('privateDNSZoneAzurewebsitesID')]"
                     }
@@ -1579,7 +1580,8 @@
                 ]
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/privateEndpoints', format('pe-{0}', format('app-ohdsiatlas-{0}', parameters('suffix'))))]"
+                "[resourceId('Microsoft.Network/privateEndpoints', format('pe-{0}', format('app-ohdsiatlas-{0}', parameters('suffix'))))]",
+                "[resourceId('Microsoft.Web/sites', format('app-ohdsiatlas-{0}', parameters('suffix')))]"
               ]
             }
           ]
