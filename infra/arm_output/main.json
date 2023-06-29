@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "13994033311446759197"
+      "templateHash": "1805142788933661347"
     }
   },
   "parameters": {
@@ -166,6 +166,18 @@
       "defaultValue": "192.168.49.0/24",
       "metadata": {
         "description": "The virtual network address prefix. Please provide a /24 CIRD prefix."
+      }
+    },
+    "appRegistrationClientId": {
+      "type": "string",
+      "metadata": {
+        "description": "App Registration ID for OID Authentication."
+      }
+    },
+    "appRegistrationClientSecret": {
+      "type": "securestring",
+      "metadata": {
+        "description": "App Registration Secret for OID Authentication."
       }
     }
   },
@@ -757,6 +769,12 @@
           },
           "privateDNSZoneAzurewebsitesID": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.privateDNSZoneAzurewebsitesID.value]"
+          },
+          "appRegistrationClientId": {
+            "value": "[parameters('appRegistrationClientId')]"
+          },
+          "appRegistrationClientSecret": {
+            "value": "[parameters('appRegistrationClientSecret')]"
           }
         },
         "template": {
@@ -766,7 +784,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "15782756446026059633"
+              "templateHash": "7022571519149803650"
             }
           },
           "parameters": {
@@ -811,19 +829,30 @@
             },
             "privateDNSZoneAzurewebsitesID": {
               "type": "string"
+            },
+            "appRegistrationClientId": {
+              "type": "string"
+            },
+            "appRegistrationClientSecret": {
+              "type": "securestring"
             }
           },
           "variables": {
             "dockerRegistryServer": "https://index.docker.io/v1",
             "dockerImageName": "ohdsi/webapi",
-            "dockerImageTag": "2.12.1",
+            "dockerImageTag": "2.13.0",
             "flywayBaselineVersion": "2.2.5.20180212152023",
             "tenantId": "[subscription().tenantId]",
             "logCategories": [
               "AppServiceAppLogs",
               "AppServiceConsoleLogs",
               "AppServiceHTTPLogs"
-            ]
+            ],
+            "atlasWebUIUrl": "[format('https://app-ohdsiatlas-{0}.azurewebsites.net/atlas', parameters('suffix'))]",
+            "atlasWebAPIUrl": "[format('https://app-ohdsiwebapi-{0}.azurewebsites.net/WebAPI', parameters('suffix'))]",
+            "atlasWelcomeUrl": "[format('{0}/#/welcome', variables('atlasWebUIUrl'))]",
+            "atlasWebAPICallbackUrl": "[format('{0}/user/oauth/callback', variables('atlasWebAPIUrl'))]",
+            "loginUrl": "[environment().authentication.loginEndpoint]"
           },
           "resources": [
             {
@@ -1024,6 +1053,34 @@
                     {
                       "name": "WEBSITES_PORT",
                       "value": "8080"
+                    },
+                    {
+                      "name": "security.oid.clientId",
+                      "value": "[parameters('appRegistrationClientId')]"
+                    },
+                    {
+                      "name": "security.oid.apiSecret",
+                      "value": "[parameters('appRegistrationClientSecret')]"
+                    },
+                    {
+                      "name": "security.oid.url",
+                      "value": "[format('https://{0}/{1}/v2.0/.well-known/openid-configuration', variables('loginUrl'), variables('tenantId'))]"
+                    },
+                    {
+                      "name": "security.oauth.callback.api",
+                      "value": "[variables('atlasWebAPICallbackUrl')]"
+                    },
+                    {
+                      "name": "security.oid.callback.ui",
+                      "value": "[variables('atlasWelcomeUrl')]"
+                    },
+                    {
+                      "name": "security.oid.redirectUrl",
+                      "value": "[variables('atlasWelcomeUrl')]"
+                    },
+                    {
+                      "name": "security.oid.logoutUrl",
+                      "value": "[variables('atlasWelcomeUrl')]"
                     }
                   ]
                 },
@@ -1342,7 +1399,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "6734623391047492665"
+              "templateHash": "12148850764319306793"
             }
           },
           "parameters": {
@@ -1372,7 +1429,7 @@
             }
           },
           "variables": {
-            "$fxv#0": "define([], function () {\n  var configLocal = {};\n\n  // clearing local storage otherwise source cache will obscure the override settings\n  localStorage.clear();\n\n  // WebAPI\n  configLocal.api = {\n    name: \"OHDSI\",\n    url: \"$OHDSI_WEBAPI_URL\",\n  };\n\n  configLocal.cohortComparisonResultsEnabled = false;\n  configLocal.userAuthenticationEnabled = true;\n  configLocal.plpResultsEnabled = false;\n\n  configLocal.authProviders = [\n    {\n      name: \"Local Security Test DB\",\n      url: \"user/login/db\",\n      ajax: true,\n      icon: \"fa fa-database\",\n      isUseCredentialsForm: true,\n    },\n  ];\n\n  return configLocal;\n});\n",
+            "$fxv#0": "define([], function () {\n  var configLocal = {};\n\n  // clearing local storage otherwise source cache will obscure the override settings\n  localStorage.clear();\n\n  // WebAPI\n  configLocal.api = {\n    name: \"OHDSI\",\n    url: \"$OHDSI_WEBAPI_URL\",\n  };\n\n  configLocal.cohortComparisonResultsEnabled = false;\n  configLocal.userAuthenticationEnabled = true;\n  configLocal.plpResultsEnabled = false;\n\n  configLocal.authProviders = [\n    {\n      name: \"OpenID\",\n      url: \"user/login/openid\",\n      ajax: false,\n      icon: \"fab fa-openid\"\n    },\n    {\n      name: \"Local Security Test DB\",\n      url: \"user/login/db\",\n      ajax: true,\n      icon: \"fa fa-database\",\n      isUseCredentialsForm: true,\n    },\n  ];\n\n  return configLocal;\n});\n",
             "dockerRegistryServer": "https://index.docker.io/v1",
             "dockerImageName": "ohdsi/atlas",
             "dockerImageTag": "2.13.0",
