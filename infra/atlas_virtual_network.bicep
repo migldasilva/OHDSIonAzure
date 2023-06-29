@@ -79,29 +79,29 @@ resource privateDNSZoneRecordA 'Microsoft.Network/privateDnsZones/A@2020-06-01' 
   }
 }
 
-resource privateDNSZonePostgresLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
-  parent: privateDNSZonePostgres
-  name: 'private-link-postgres-${suffix}'
-  location: 'global'
-  properties: {
-    registrationEnabled: true
-    virtualNetwork: {
-      id: virtualNetwork.id
-    }
-  }
-}
+// resource privateDNSZonePostgresLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+//   parent: privateDNSZonePostgres
+//   name: 'private-link-postgres-${suffix}'
+//   location: 'global'
+//   properties: {
+//     registrationEnabled: true
+//     virtualNetwork: {
+//       id: virtualNetwork.id
+//     }
+//   }
+// }
 
-resource privateDNSZoneAzurewebsitesLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
-  parent: privateDNSZoneAzurewebsites
-  name: 'private-link-websites-${suffix}'
-  location: 'global'
-  properties: {
-    registrationEnabled: true
-    virtualNetwork: {
-      id: virtualNetwork.id
-    }
-  }
-}
+// resource privateDNSZoneAzurewebsitesLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+//   parent: privateDNSZoneAzurewebsites
+//   name: 'private-link-websites-${suffix}'
+//   location: 'global'
+//   properties: {
+//     registrationEnabled: true
+//     virtualNetwork: {
+//       id: virtualNetwork.id
+//     }
+//   }
+// }
 
 output privateDNSZonePostgresID string = privateDNSZonePostgres.id
 output privateDNSZonePostgresName string = privateDNSZonePostgres.name

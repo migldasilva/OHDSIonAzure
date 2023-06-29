@@ -176,3 +176,5 @@ resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2
 //     }
 //   }
 // }
+
+output postgresOMOPCDMUsername string = postgresOMOPCDMUsername
