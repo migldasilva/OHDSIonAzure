@@ -16,6 +16,12 @@ define([], function () {
 
   configLocal.authProviders = [
     {
+      name: "OpenID",
+      url: "user/login/openid",
+      ajax: false,
+      icon: "fab fa-openid"
+    },
+    {
       name: "Local Security Test DB",
       url: "user/login/db",
       ajax: true,

@@ -94,6 +94,13 @@ param localDebug bool = false
 @description('The virtual network address prefix. Please provide a /24 CIRD prefix.')
 param addressPrefix string = '192.168.49.0/24'
 
+@description('App Registration ID for OID Authentication.')
+param appRegistrationClientId string
+
+@secure()
+@description('App Registration Secret for OID Authentication.')
+param appRegistrationClientSecret string
+
 var tenantId = subscription().tenantId
 
 @description('Creates the app service plan')
@@ -197,6 +204,8 @@ module ohdsiWebApiWebapp 'ohdsi_webapi.bicep' = {
     webAppVirtualSubnetId: atlasVirtualNetwork.outputs.webAppVirtualSubnetId
     webAppOutboundVirtualSubnetId: atlasVirtualNetwork.outputs.webAppOutboundVirtualSubnetId
     privateDNSZoneAzurewebsitesID: atlasVirtualNetwork.outputs.privateDNSZoneAzurewebsitesID
+    appRegistrationClientId: appRegistrationClientId
+    appRegistrationClientSecret: appRegistrationClientSecret
   }
   dependsOn: [
     atlasDatabase

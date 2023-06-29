@@ -91,18 +91,6 @@ resource privateDNSZonePostgresLink 'Microsoft.Network/privateDnsZones/virtualNe
   }
 }
 
-// resource privateDNSZoneAzurewebsitesLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
-//   parent: privateDNSZoneAzurewebsites
-//   name: 'private-link-websites-${suffix}'
-//   location: 'global'
-//   properties: {
-//     registrationEnabled: true
-//     virtualNetwork: {
-//       id: virtualNetwork.id
-//     }
-//   }
-// }
-
 output privateDNSZonePostgresID string = privateDNSZonePostgres.id
 output privateDNSZonePostgresName string = privateDNSZonePostgres.name
 output privateDNSZoneAzurewebsitesID string = privateDNSZoneAzurewebsites.id
