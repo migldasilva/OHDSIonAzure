@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "4230515235342710728"
+      "templateHash": "15808308241118701623"
     }
   },
   "parameters": {
@@ -277,7 +277,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "13629476564664235645"
+              "templateHash": "16765127150772321607"
             }
           },
           "parameters": {
@@ -379,38 +379,6 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-              "apiVersion": "2020-06-01",
-              "name": "[format('{0}/{1}', 'privatelink.postgres.database.azure.com', format('private-link-postgres-{0}', parameters('suffix')))]",
-              "location": "global",
-              "properties": {
-                "registrationEnabled": true,
-                "virtualNetwork": {
-                  "id": "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]",
-                "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-              "apiVersion": "2020-06-01",
-              "name": "[format('{0}/{1}', 'privatelink.azurewebsites.net', format('private-link-websites-{0}', parameters('suffix')))]",
-              "location": "global",
-              "properties": {
-                "registrationEnabled": true,
-                "virtualNetwork": {
-                  "id": "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.azurewebsites.net')]",
-                "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
               ]
             }
           ],
@@ -1194,7 +1162,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "5064692683648253269"
+              "templateHash": "12284728758941263149"
             }
           },
           "parameters": {
@@ -1298,7 +1266,13 @@
                 "collation": "en_US.utf8"
               }
             }
-          ]
+          ],
+          "outputs": {
+            "postgresOMOPCDMUsername": {
+              "type": "string",
+              "value": "[variables('postgresOMOPCDMUsername')]"
+            }
+          }
         }
       },
       "dependsOn": [
