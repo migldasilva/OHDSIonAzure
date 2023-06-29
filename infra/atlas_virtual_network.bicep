@@ -54,14 +54,19 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   }
 }
 
-resource privateDNSZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  name: 'private.postgres.database.azure.com'
+resource privateDNSZonePostgres 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.postgres.database.azure.com'
+  location: 'global'
+}
+
+resource privateDNSZoneAzurewebsites 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.azurewebsites.net'
   location: 'global'
 }
 
 // Add a DNS A record for the PSQL Flexible Server
 resource privateDNSZoneRecordA 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
-  parent: privateDNSZone
+  parent: privateDNSZonePostgres
   name: 'psql-${suffix}'
   properties: {
     ttl: 30
@@ -74,9 +79,9 @@ resource privateDNSZoneRecordA 'Microsoft.Network/privateDnsZones/A@2020-06-01' 
   }
 }
 
-resource privateDNSZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
-  parent: privateDNSZone
-  name: 'private-link-${suffix}'
+resource privateDNSZonePostgresLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: privateDNSZonePostgres
+  name: 'private-link-postgres-${suffix}'
   location: 'global'
   properties: {
     registrationEnabled: true
@@ -86,9 +91,22 @@ resource privateDNSZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLin
   }
 }
 
-output privateDNSZoneID string = privateDNSZone.id
+resource privateDNSZoneAzurewebsitesLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: privateDNSZoneAzurewebsites
+  name: 'private-link-websites-${suffix}'
+  location: 'global'
+  properties: {
+    registrationEnabled: true
+    virtualNetwork: {
+      id: virtualNetwork.id
+    }
+  }
+}
+
+output privateDNSZonePostgresID string = privateDNSZonePostgres.id
+output privateDNSZonePostgresName string = privateDNSZonePostgres.name
+output privateDNSZoneAzurewebsitesID string = privateDNSZoneAzurewebsites.id
 output postgresVirtualSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'PostgreSQL')
 output webAppVirtualSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'WebApp')
 output webAppOutboundVirtualSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', virtualNetwork.name, 'WebAppOutbound')
 output virtualNetworkId string = virtualNetwork.id
-output privateDNSZoneName string = privateDNSZone.name

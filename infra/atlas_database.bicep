@@ -12,10 +12,8 @@ param postgresWebapiAppPassword string
 @description('Enables local access for debugging.')
 param localDebug bool = false
 param logAnalyticsWorkspaceId string
-param privateDNSZoneId string
+param privateDNSZonePostgresID string
 param postgresVirtualSubnetId string
-//param privateDNSZoneName string
-//param virtualNetworkId string
 
 var postgresAdminUsername = 'postgres_admin'
 var postgresWebapiAdminUsername = 'ohdsi_admin_user'
@@ -25,7 +23,6 @@ var postgresWebapiAppRole = 'ohdsi_app'
 var postgresWebApiDatabaseName = 'atlas_webapi_db'
 var postgresSchemaName = 'webapi'
 var postgresVersion = '14'
-//var privateEndpointName = 'pe-psql-${suffix}'
 
 var logCategories = ['PostgreSQLLogs']
 // these cost extra.
@@ -80,23 +77,10 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' =
     }
     network: {
       delegatedSubnetResourceId: postgresVirtualSubnetId
-      privateDnsZoneArmResourceId: privateDNSZoneId
+      privateDnsZoneArmResourceId: privateDNSZonePostgresID
     }
   }
 }
-
-// // Add a DNS A record for the PSQL Flexible Server
-// resource privateDNSZoneRecordA 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
-//   name: '${privateDNSZoneName}/psql-${suffix}'
-//   properties: {
-//     ttl: 30
-//     aRecords: [
-//       {
-//         ipv4Address: privateEndpoint.properties.ipConfigurations[0].properties.privateIPAddress
-//       }
-//     ]
-//   }
-// }
 
 // Allow public access from any Azure service within Azure to this server
 resource allowAccessToAzureServices 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2022-12-01' = {
@@ -187,7 +171,7 @@ resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2
 //         value: loadTextContent('sql/atlas_create_schema.sql')
 //       }
 //     ]
-//     scriptContent: loadTextContent('scripts/atlas_db_init.sh')gg
+//     scriptContent: loadTextContent('scripts/atlas_db_init.sh')
 //     cleanupPreference: 'OnSuccess'
 //     retentionInterval: 'PT1H'
 //   }

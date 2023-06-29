@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "17989780927675693416"
+      "templateHash": "8866054256402933105"
     }
   },
   "parameters": {
@@ -277,7 +277,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "5512286129982062102"
+              "templateHash": "13629476564664235645"
             }
           },
           "parameters": {
@@ -356,13 +356,19 @@
             {
               "type": "Microsoft.Network/privateDnsZones",
               "apiVersion": "2020-06-01",
-              "name": "private.postgres.database.azure.com",
+              "name": "privatelink.postgres.database.azure.com",
+              "location": "global"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2020-06-01",
+              "name": "privatelink.azurewebsites.net",
               "location": "global"
             },
             {
               "type": "Microsoft.Network/privateDnsZones/A",
               "apiVersion": "2020-06-01",
-              "name": "[format('{0}/{1}', 'private.postgres.database.azure.com', format('psql-{0}', parameters('suffix')))]",
+              "name": "[format('{0}/{1}', 'privatelink.postgres.database.azure.com', format('psql-{0}', parameters('suffix')))]",
               "properties": {
                 "ttl": 30,
                 "aRecords": [
@@ -372,13 +378,13 @@
                 ]
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', 'private.postgres.database.azure.com')]"
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
               ]
             },
             {
               "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
               "apiVersion": "2020-06-01",
-              "name": "[format('{0}/{1}', 'private.postgres.database.azure.com', format('private-link-{0}', parameters('suffix')))]",
+              "name": "[format('{0}/{1}', 'privatelink.postgres.database.azure.com', format('private-link-postgres-{0}', parameters('suffix')))]",
               "location": "global",
               "properties": {
                 "registrationEnabled": true,
@@ -387,15 +393,39 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', 'private.postgres.database.azure.com')]",
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2020-06-01",
+              "name": "[format('{0}/{1}', 'privatelink.azurewebsites.net', format('private-link-websites-{0}', parameters('suffix')))]",
+              "location": "global",
+              "properties": {
+                "registrationEnabled": true,
+                "virtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.azurewebsites.net')]",
                 "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
               ]
             }
           ],
           "outputs": {
-            "privateDNSZoneID": {
+            "privateDNSZonePostgresID": {
               "type": "string",
-              "value": "[resourceId('Microsoft.Network/privateDnsZones', 'private.postgres.database.azure.com')]"
+              "value": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
+            },
+            "privateDNSZonePostgresName": {
+              "type": "string",
+              "value": "privatelink.postgres.database.azure.com"
+            },
+            "privateDNSZoneAzurewebsitesID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.azurewebsites.net')]"
             },
             "postgresVirtualSubnetId": {
               "type": "string",
@@ -412,10 +442,6 @@
             "virtualNetworkId": {
               "type": "string",
               "value": "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}', parameters('suffix')))]"
-            },
-            "privateDNSZoneName": {
-              "type": "string",
-              "value": "private.postgres.database.azure.com"
             }
           }
         }
@@ -464,8 +490,8 @@
           "logAnalyticsWorkspaceId": {
             "value": "[resourceId('Microsoft.OperationalInsights/workspaces', format('log-{0}', parameters('suffix')))]"
           },
-          "privateDNSZoneId": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.privateDNSZoneID.value]"
+          "privateDNSZonePostgresID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.privateDNSZonePostgresID.value]"
           },
           "postgresVirtualSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.postgresVirtualSubnetId.value]"
@@ -478,7 +504,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "2889061701527764001"
+              "templateHash": "18117241400760364884"
             }
           },
           "parameters": {
@@ -516,7 +542,7 @@
             "logAnalyticsWorkspaceId": {
               "type": "string"
             },
-            "privateDNSZoneId": {
+            "privateDNSZonePostgresID": {
               "type": "string"
             },
             "postgresVirtualSubnetId": {
@@ -583,7 +609,7 @@
                 },
                 "network": {
                   "delegatedSubnetResourceId": "[parameters('postgresVirtualSubnetId')]",
-                  "privateDnsZoneArmResourceId": "[parameters('privateDNSZoneId')]"
+                  "privateDnsZoneArmResourceId": "[parameters('privateDNSZonePostgresID')]"
                 }
               }
             },
@@ -744,6 +770,9 @@
           },
           "webAppOutboundVirtualSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppOutboundVirtualSubnetId.value]"
+          },
+          "privateDNSZoneAzurewebsitesID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.privateDNSZoneAzurewebsitesID.value]"
           }
         },
         "template": {
@@ -753,7 +782,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "3348702756594113150"
+              "templateHash": "289964917472998855"
             }
           },
           "parameters": {
@@ -794,6 +823,9 @@
               "type": "string"
             },
             "webAppOutboundVirtualSubnetId": {
+              "type": "string"
+            },
+            "privateDNSZoneAzurewebsitesID": {
               "type": "string"
             }
           },
@@ -1074,6 +1106,24 @@
               "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', format('app-ohdsiwebapi-{0}', parameters('suffix')))]"
               ]
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+              "apiVersion": "2021-03-01",
+              "name": "[format('{0}/{1}', format('pe-{0}', format('app-ohdsiwebapi-{0}', parameters('suffix'))), 'privateDnsZoneGroup')]",
+              "properties": {
+                "privateDnsZoneConfigs": [
+                  {
+                    "name": "config",
+                    "properties": {
+                      "privateDnsZoneId": "[parameters('privateDNSZoneAzurewebsitesID')]"
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', format('pe-{0}', format('app-ohdsiwebapi-{0}', parameters('suffix'))))]"
+              ]
             }
           ],
           "outputs": {
@@ -1289,6 +1339,9 @@
           },
           "webAppOutboundVirtualSubnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.webAppOutboundVirtualSubnetId.value]"
+          },
+          "privateDNSZoneAzurewebsitesID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'atlasVirtualNetwork'), '2022-09-01').outputs.privateDNSZoneAzurewebsitesID.value]"
           }
         },
         "template": {
@@ -1298,7 +1351,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "12200703031180864509"
+              "templateHash": "18010638622836673075"
             }
           },
           "parameters": {
@@ -1321,6 +1374,9 @@
               "type": "string"
             },
             "webAppOutboundVirtualSubnetId": {
+              "type": "string"
+            },
+            "privateDNSZoneAzurewebsitesID": {
               "type": "string"
             }
           },
@@ -1506,6 +1562,24 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', format('app-ohdsiatlas-{0}', parameters('suffix')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+              "apiVersion": "2021-03-01",
+              "name": "[format('{0}/{1}', format('pe-{0}', format('app-ohdsiatlas-{0}', parameters('suffix'))), 'privateDnsZoneGroup')]",
+              "properties": {
+                "privateDnsZoneConfigs": [
+                  {
+                    "name": "config",
+                    "properties": {
+                      "privateDnsZoneId": "[parameters('privateDNSZoneAzurewebsitesID')]"
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', format('pe-{0}', format('app-ohdsiatlas-{0}', parameters('suffix'))))]"
               ]
             }
           ]

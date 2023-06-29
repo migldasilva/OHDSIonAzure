@@ -14,6 +14,7 @@ param postgresWebapiAdminSecret string
 param logAnalyticsWorkspaceId string
 param webAppVirtualSubnetId string
 param webAppOutboundVirtualSubnetId string
+param privateDNSZoneAzurewebsitesID string
 
 var dockerRegistryServer = 'https://index.docker.io/v1'
 var dockerImageName = 'ohdsi/webapi'
@@ -266,6 +267,21 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = {
           groupIds: [
             'sites'
           ]
+        }
+      }
+    ]
+  }
+}
+
+resource privatednszonegroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = {
+  parent: privateEndpoint
+  name: 'privateDnsZoneGroup'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config'
+        properties: {
+          privateDnsZoneId: privateDNSZoneAzurewebsitesID
         }
       }
     ]
