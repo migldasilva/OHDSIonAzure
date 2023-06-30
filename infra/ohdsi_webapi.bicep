@@ -260,8 +260,7 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
         {
           name: 'security.oid.logoutUrl'
           value: atlasWelcomeUrl
-        }
-               
+        }               
       ]
     }
     virtualNetworkSubnetId: webAppOutboundVirtualSubnetId
