@@ -243,7 +243,7 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'security.oid.url'
-          value: 'https://${loginUrl}/${tenantId}/v2.0/.well-known/openid-configuration'
+          value: '${loginUrl}${tenantId}/v2.0/.well-known/openid-configuration'
         }
         {
           name: 'security.oauth.callback.api'
