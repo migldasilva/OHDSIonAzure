@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "1805142788933661347"
+      "templateHash": "544633602277534190"
     }
   },
   "parameters": {
@@ -784,7 +784,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "7022571519149803650"
+              "templateHash": "1759382577021273275"
             }
           },
           "parameters": {
@@ -1064,7 +1064,7 @@
                     },
                     {
                       "name": "security.oid.url",
-                      "value": "[format('https://{0}/{1}/v2.0/.well-known/openid-configuration', variables('loginUrl'), variables('tenantId'))]"
+                      "value": "[format('{0}{1}/v2.0/.well-known/openid-configuration', variables('loginUrl'), variables('tenantId'))]"
                     },
                     {
                       "name": "security.oauth.callback.api",
