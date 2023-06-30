@@ -250,7 +250,7 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
           value: atlasWebAPICallbackUrl
         }
         {
-          name: 'security.oid.callback.ui'
+          name: 'security.oauth.callback.ui'
           value: atlasWelcomeUrl
         }
         {

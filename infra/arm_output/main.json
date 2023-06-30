@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "544633602277534190"
+      "templateHash": "15331050583210120681"
     }
   },
   "parameters": {
@@ -784,7 +784,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "1759382577021273275"
+              "templateHash": "17403701129092393686"
             }
           },
           "parameters": {
@@ -1071,7 +1071,7 @@
                       "value": "[variables('atlasWebAPICallbackUrl')]"
                     },
                     {
-                      "name": "security.oid.callback.ui",
+                      "name": "security.oauth.callback.ui",
                       "value": "[variables('atlasWelcomeUrl')]"
                     },
                     {
