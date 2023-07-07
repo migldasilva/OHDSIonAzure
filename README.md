@@ -40,7 +40,7 @@ This setup is based on the [CDM v5.4.0 for PostgreSQL](https://github.com/OHDSI/
 
 To get started, click on deploy to Azure button.
 To get more detailed instructions, please refer to the [Deployment Guide](./docs/DeploymentGuide.md).
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmigldasilva%2FOHDSIonAzure%2Fmigueldasilva%2Ffeature%2Fenable-database-vnet-integration%2Finfra%2Farm_output%2Fmain.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmigldasilva%2FOHDSIonAzure%2Fmigueldasilva%2Fmain%2Finfra%2Farm_output%2Fmain.json)
 
 ## Contributing
 
