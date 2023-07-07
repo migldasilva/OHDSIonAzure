@@ -91,6 +91,16 @@ param atlasUsersList string
 @description('Enables local access for debugging.')
 param localDebug bool = false
 
+@description('The virtual network address prefix. Please provide a /24 CIRD prefix.')
+param addressPrefix string = '192.168.49.0/24'
+
+@description('App Registration ID for OID Authentication.')
+param appRegistrationClientId string
+
+@secure()
+@description('App Registration Secret for OID Authentication.')
+param appRegistrationClientSecret string
+
 var tenantId = subscription().tenantId
 
 @description('Creates the app service plan')
@@ -145,6 +155,16 @@ resource keyVaultDiagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-0
 }
 
 @description('Creates the database server, users and groups required for ohdsi webapi')
+module atlasVirtualNetwork 'atlas_virtual_network.bicep' = {
+  name: 'atlasVirtualNetwork'
+  params: {
+    location: location
+    suffix: suffix
+    addressPrefix: addressPrefix
+  }
+}
+
+@description('Creates the database server, users and groups required for ohdsi webapi')
 module atlasDatabase 'atlas_database.bicep' = {
   name: 'atlasDatabase'
   params: {
@@ -158,7 +178,12 @@ module atlasDatabase 'atlas_database.bicep' = {
     postgresWebapiAppPassword: postgresWebapiAppPassword
     localDebug: localDebug
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    privateDNSZonePostgresID: atlasVirtualNetwork.outputs.privateDNSZonePostgresID
+    postgresVirtualSubnetId: atlasVirtualNetwork.outputs.postgresVirtualSubnetId
   }
+  dependsOn: [
+    atlasVirtualNetwork
+  ]
 }
 
 @description('Creates the ohdsi webapi')
@@ -176,6 +201,11 @@ module ohdsiWebApiWebapp 'ohdsi_webapi.bicep' = {
     postgresWebapiAppUsername: atlasDatabase.outputs.postgresWebapiAppUsername
     postgresWebApiSchemaName: atlasDatabase.outputs.postgresSchemaName
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    webAppVirtualSubnetId: atlasVirtualNetwork.outputs.webAppVirtualSubnetId
+    webAppOutboundVirtualSubnetId: atlasVirtualNetwork.outputs.webAppOutboundVirtualSubnetId
+    privateDNSZoneAzurewebsitesID: atlasVirtualNetwork.outputs.privateDNSZoneAzurewebsitesID
+    appRegistrationClientId: appRegistrationClientId
+    appRegistrationClientSecret: appRegistrationClientSecret
   }
   dependsOn: [
     atlasDatabase
@@ -213,6 +243,9 @@ module atlasUI 'ohdsi_atlas_ui.bicep' = {
     appServicePlanId: appServicePlan.id
     ohdsiWebApiUrl: ohdsiWebApiWebapp.outputs.ohdsiWebapiUrl
     logAnalyticsWorkspaceId: logAnalyticsWorkspace.id
+    webAppVirtualSubnetId: atlasVirtualNetwork.outputs.webAppVirtualSubnetId
+    webAppOutboundVirtualSubnetId: atlasVirtualNetwork.outputs.webAppOutboundVirtualSubnetId
+    privateDNSZoneAzurewebsitesID: atlasVirtualNetwork.outputs.privateDNSZoneAzurewebsitesID
   }
   dependsOn: [
     ohdsiWebApiWebapp
@@ -229,47 +262,47 @@ resource atlasSecurityAdminSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01'
   }
 }
 
-resource deploymentAtlasSecurity 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: 'deployment-atlas-security'
-  location: location
-  kind: 'AzureCLI'
-  properties: {
-    azCliVersion: '2.42.0'
-    timeout: 'PT60M'
-    forceUpdateTag: '5'
-    containerSettings: {
-      containerGroupName: 'deployment-atlas-security'
-    }
-    retentionInterval: 'PT1H'
-    cleanupPreference: 'OnExpiration'
-    environmentVariables: [
-      {
-        name: 'OHDSI_ADMIN_CONNECTION_STRING'
-        secureValue: 'host=${atlasDatabase.outputs.postgresServerFullyQualifiedDomainName} port=5432 dbname=${atlasDatabase.outputs.postgresWebApiDatabaseName} user=${atlasDatabase.outputs.postgresWebapiAdminUsername} password=${postgresWebapiAdminPassword} sslmode=require'
-      }
-      {
-        name: 'ATLAS_SECURITY_ADMIN_PASSWORD'
-        secureValue: atlasSecurityAdminPassword
-      }
-      {
-        name: 'ATLAS_USERS'
-        secureValue: 'admin,${atlasSecurityAdminPassword},${atlasUsersList}'
-      }
-      {
-        name: 'SQL_ATLAS_CREATE_SECURITY'
-        value: loadTextContent('sql/atlas_create_security.sql')
-      }
-      {
-        name: 'WEBAPI_URL'
-        value: ohdsiWebApiWebapp.outputs.ohdsiWebapiUrl
-      }
-    ]
-    scriptContent: loadTextContent('scripts/atlas_security.sh')
-  }
-  dependsOn: [
-    atlasDatabase
-  ]
-}
+// resource deploymentAtlasSecurity 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+//   name: 'deployment-atlas-security'
+//   location: location
+//   kind: 'AzureCLI'
+//   properties: {
+//     azCliVersion: '2.42.0'
+//     timeout: 'PT60M'
+//     forceUpdateTag: '5'
+//     containerSettings: {
+//       containerGroupName: 'deployment-atlas-security'
+//     }
+//     retentionInterval: 'PT1H'
+//     cleanupPreference: 'OnExpiration'
+//     environmentVariables: [
+//       {
+//         name: 'OHDSI_ADMIN_CONNECTION_STRING'
+//         secureValue: 'host=${atlasDatabase.outputs.postgresServerFullyQualifiedDomainName} port=5432 dbname=${atlasDatabase.outputs.postgresWebApiDatabaseName} user=${atlasDatabase.outputs.postgresWebapiAdminUsername} password=${postgresWebapiAdminPassword} sslmode=require'
+//       }
+//       {
+//         name: 'ATLAS_SECURITY_ADMIN_PASSWORD'
+//         secureValue: atlasSecurityAdminPassword
+//       }
+//       {
+//         name: 'ATLAS_USERS'
+//         secureValue: 'admin,${atlasSecurityAdminPassword},${atlasUsersList}'
+//       }
+//       {
+//         name: 'SQL_ATLAS_CREATE_SECURITY'
+//         value: loadTextContent('sql/atlas_create_security.sql')
+//       }
+//       {
+//         name: 'WEBAPI_URL'
+//         value: ohdsiWebApiWebapp.outputs.ohdsiWebapiUrl
+//       }
+//     ]
+//     scriptContent: loadTextContent('scripts/atlas_security.sh')
+//   }
+//   dependsOn: [
+//     atlasDatabase
+//   ]
+// }
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   #disable-next-line use-stable-resource-identifiers
@@ -277,74 +310,74 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
   location: location
 }
 
-resource deplymentAddDataSource 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: 'deployment-add-data-source'
-  location: location
-  kind: 'AzureCLI'
-  properties: {
-    azCliVersion: '2.42.0'
-    timeout: 'PT5M'
-    forceUpdateTag: '5'
-    containerSettings: {
-      containerGroupName: 'deployment-add-data-source'
-    }
-    retentionInterval: 'PT1H'
-    cleanupPreference: 'OnExpiration'
-    environmentVariables: [
-      {
-        name: 'CONNECTION_STRING'
-        secureValue: 'jdbc:postgresql://${atlasDatabase.outputs.postgresServerFullyQualifiedDomainName}:5432/${postgresOMOPCDMDatabaseName}?user=postgres_admin&password=${postgresOMOPCDMPassword}&sslmode=require'
-      }
-      {
-        name: 'OHDSI_WEBAPI_PASSWORD'
-        secureValue: atlasSecurityAdminPassword
-      }
-      {
-        name: 'OHDSI_WEBAPI_USER'
-        value: 'admin'
-      }
-      {
-        name: 'OHDSI_WEBAPI_URL'
-        value: ohdsiWebApiWebapp.outputs.ohdsiWebapiUrl
-      }
-      {
-        name: 'DIALECT'
-        value: 'postgresql'
-      }
-      {
-        name: 'SOURCE_NAME'
-        value: 'omop-cdm-synthea'
-      }
-      {
-        name: 'SOURCE_KEY'
-        value: 'omop-cdm-synthea'
-      }
-      {
-        name: 'USERNAME'
-        value: atlasDatabase.outputs.postgresWebapiAdminUsername
-      }
-      {
-        name: 'PASSWORD'
-        secureValue: postgresWebapiAdminPassword
-      }
-      {
-        name: 'DAIMON_CDM'
-        value: 'cdm'
-      }
-      {
-        name: 'DAIMON_VOCABULARY'
-        value: 'cdm'
-      }
-      {
-        name: 'DAIMON_RESULTS'
-        value: 'cdm_results'
-      }
-    ]
-    scriptContent: loadTextContent('scripts/add_data_source.sh')
-  }
-  dependsOn: [
-    deploymentAtlasSecurity
-    ohdsiWebApiWebapp
-    omopCDM
-  ]
-}
+// resource deplymentAddDataSource 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+//   name: 'deployment-add-data-source'
+//   location: location
+//   kind: 'AzureCLI'
+//   properties: {
+//     azCliVersion: '2.42.0'
+//     timeout: 'PT5M'
+//     forceUpdateTag: '5'
+//     containerSettings: {
+//       containerGroupName: 'deployment-add-data-source'
+//     }
+//     retentionInterval: 'PT1H'
+//     cleanupPreference: 'OnExpiration'
+//     environmentVariables: [
+//       {
+//         name: 'CONNECTION_STRING'
+//         secureValue: 'jdbc:postgresql://${atlasDatabase.outputs.postgresServerFullyQualifiedDomainName}:5432/${postgresOMOPCDMDatabaseName}?user=postgres_admin&password=${postgresOMOPCDMPassword}&sslmode=require'
+//       }
+//       {
+//         name: 'OHDSI_WEBAPI_PASSWORD'
+//         secureValue: atlasSecurityAdminPassword
+//       }
+//       {
+//         name: 'OHDSI_WEBAPI_USER'
+//         value: 'admin'
+//       }
+//       {
+//         name: 'OHDSI_WEBAPI_URL'
+//         value: ohdsiWebApiWebapp.outputs.ohdsiWebapiUrl
+//       }
+//       {
+//         name: 'DIALECT'
+//         value: 'postgresql'
+//       }
+//       {
+//         name: 'SOURCE_NAME'
+//         value: 'omop-cdm-synthea'
+//       }
+//       {
+//         name: 'SOURCE_KEY'
+//         value: 'omop-cdm-synthea'
+//       }
+//       {
+//         name: 'USERNAME'
+//         value: atlasDatabase.outputs.postgresWebapiAdminUsername
+//       }
+//       {
+//         name: 'PASSWORD'
+//         secureValue: postgresWebapiAdminPassword
+//       }
+//       {
+//         name: 'DAIMON_CDM'
+//         value: 'cdm'
+//       }
+//       {
+//         name: 'DAIMON_VOCABULARY'
+//         value: 'cdm'
+//       }
+//       {
+//         name: 'DAIMON_RESULTS'
+//         value: 'cdm_results'
+//       }
+//     ]
+//     scriptContent: loadTextContent('scripts/add_data_source.sh')
+//   }
+//   dependsOn: [
+//     deploymentAtlasSecurity
+//     ohdsiWebApiWebapp
+//     omopCDM
+//   ]
+// }

@@ -3,6 +3,9 @@ param suffix string
 param appServicePlanId string
 param ohdsiWebApiUrl string
 param logAnalyticsWorkspaceId string
+param webAppVirtualSubnetId string
+param webAppOutboundVirtualSubnetId string
+param privateDNSZoneAzurewebsitesID string
 
 var dockerRegistryServer = 'https://index.docker.io/v1'
 var dockerImageName = 'ohdsi/atlas'
@@ -115,6 +118,7 @@ resource uiWebApp 'Microsoft.Web/sites@2022-03-01' = {
         }
       ]
     }
+    virtualNetworkSubnetId: webAppOutboundVirtualSubnetId
   }
   dependsOn: [
     deploymentOhdsiAtlasConfigScript
@@ -134,5 +138,42 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
         enabled: true
       }
     }]
+  }
+}
+
+// Assign the private endpoit to the PostgreSQL server
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = {
+  name: 'pe-${uiWebApp.name}'
+  location: location
+  properties: {
+    subnet: {
+      id: webAppVirtualSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'pe-${uiWebApp.name}'
+        properties: {
+          privateLinkServiceId: uiWebApp.id
+          groupIds: [
+            'sites'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = {
+  parent: privateEndpoint
+  name: 'privateDnsZoneGroup'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'dns-zone-group-${uiWebApp.name}'
+        properties: {
+          privateDnsZoneId: privateDNSZoneAzurewebsitesID
+        }
+      }
+    ]
   }
 }

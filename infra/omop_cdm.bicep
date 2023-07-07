@@ -84,95 +84,97 @@ resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2
   }
 }
 
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: 'deployment-omop-cdm'
-  location: location
-  kind: 'AzureCLI'
-  properties: {
-    azCliVersion: '2.42.0'
-    timeout: 'PT60M'
-    forceUpdateTag: '1'
-    environmentVariables: [
-      {
-        name: 'WEBAPI_SCHEMA_NAME'
-        value: postgresWebAPISchemaName
-      }
-      {
-        name: 'ATLAS_DB_CONNECTION_STRING'
-        secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresAtlasDatabaseName} user=${postgresWebapiAdminUsername} password=${postgresWebapiAdminPassword} sslmode=require'
-      }
-      {
-        name: 'OMOP_CONNECTION_STRING'
-        secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresOMOPCDMDatabaseName} user=${postgresAdminUsername} password=${postgresAdminPassword} sslmode=require'
-      }
-      {
-        name: 'OMOP_JDBC_CONNECTION_STRING'
-        secureValue: postgresOMOPCDMJDBCConnectionString
-      }
-      {
-        name: 'OMOP_CDM_DATABASE_NAME'
-        value: postgresOMOPCDMDatabaseName
-      }
-      {
-        name: 'OMOP_CDM_CONTAINER_URL'
-        value: cdmContainerUrl
-      }
-      {
-        name: 'POSTGRES_ADMIN_USERNAME'
-        value: postgresAdminUsername
-      }
-      {
-        name: 'POSTGRES_CDM_USERNAME'
-        value: postgresOMOPCDMUsername
-      }
-      {
-        name: 'POSTGRES_OMOP_CDM_ROLE'
-        value: postgresOMOPCDMRole
-      }
-      {
-        name: 'POSTGRES_OMOP_CDM_PASSWORD'
-        secureValue: postgresOMOPCDMPassword
-      }
-      {
-        name: 'OMOP_CDM_SAS_TOKEN'
-        value: cdmSasToken
-      }
-      {
-        name: 'POSTGRES_OMOP_CDM_SCHEMA_NAME'
-        value: postgresOMOPCDMSchemaName
-      }
-      {
-        name: 'POSTGRES_OMOP_RESULTS_SCHEMA_NAME'
-        value: postgresOMOPResultsSchemaName
-      }
-      {
-        name: 'POSTGRES_OMOP_TEMP_SCHEMA_NAME'
-        value: postgresOMOPTempSchemaName
-      }
-      {
-        name: 'SQL_create_omop_schemas'
-        value: loadTextContent('sql/create_omop_schemas.sql')
-      }
-      {
-        name: 'SQL_create_achilles_schema'
-        value: loadTextContent('sql/create_achilles_schema.sql')
-      }
-      {
-        name: 'SQL_add_omop_source'
-        value: loadTextContent('sql/add_omop_source.sql')
-      }
-    ]
-    scriptContent: loadTextContent('scripts/create_omop_cdm.sh')
-    supportingScriptUris: [
-      'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_ddl.sql'
-      'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_constraints.sql'
-      'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_primary_keys.sql'
-      'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_indices.sql'
-    ]
-    cleanupPreference: 'OnExpiration'
-    retentionInterval: 'PT1H'
-    containerSettings: {
-      containerGroupName: 'deployment-omop-cdm'
-    }
-  }
-}
+// resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+//   name: 'deployment-omop-cdm'
+//   location: location
+//   kind: 'AzureCLI'
+//   properties: {
+//     azCliVersion: '2.42.0'
+//     timeout: 'PT60M'
+//     forceUpdateTag: '1'
+//     environmentVariables: [
+//       {
+//         name: 'WEBAPI_SCHEMA_NAME'
+//         value: postgresWebAPISchemaName
+//       }
+//       {
+//         name: 'ATLAS_DB_CONNECTION_STRING'
+//         secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresAtlasDatabaseName} user=${postgresWebapiAdminUsername} password=${postgresWebapiAdminPassword} sslmode=require'
+//       }
+//       {
+//         name: 'OMOP_CONNECTION_STRING'
+//         secureValue: 'host=${postgresServer.properties.fullyQualifiedDomainName} port=5432 dbname=${postgresOMOPCDMDatabaseName} user=${postgresAdminUsername} password=${postgresAdminPassword} sslmode=require'
+//       }
+//       {
+//         name: 'OMOP_JDBC_CONNECTION_STRING'
+//         secureValue: postgresOMOPCDMJDBCConnectionString
+//       }
+//       {
+//         name: 'OMOP_CDM_DATABASE_NAME'
+//         value: postgresOMOPCDMDatabaseName
+//       }
+//       {
+//         name: 'OMOP_CDM_CONTAINER_URL'
+//         value: cdmContainerUrl
+//       }
+//       {
+//         name: 'POSTGRES_ADMIN_USERNAME'
+//         value: postgresAdminUsername
+//       }
+//       {
+//         name: 'POSTGRES_CDM_USERNAME'
+//         value: postgresOMOPCDMUsername
+//       }
+//       {
+//         name: 'POSTGRES_OMOP_CDM_ROLE'
+//         value: postgresOMOPCDMRole
+//       }
+//       {
+//         name: 'POSTGRES_OMOP_CDM_PASSWORD'
+//         secureValue: postgresOMOPCDMPassword
+//       }
+//       {
+//         name: 'OMOP_CDM_SAS_TOKEN'
+//         value: cdmSasToken
+//       }
+//       {
+//         name: 'POSTGRES_OMOP_CDM_SCHEMA_NAME'
+//         value: postgresOMOPCDMSchemaName
+//       }
+//       {
+//         name: 'POSTGRES_OMOP_RESULTS_SCHEMA_NAME'
+//         value: postgresOMOPResultsSchemaName
+//       }
+//       {
+//         name: 'POSTGRES_OMOP_TEMP_SCHEMA_NAME'
+//         value: postgresOMOPTempSchemaName
+//       }
+//       {
+//         name: 'SQL_create_omop_schemas'
+//         value: loadTextContent('sql/create_omop_schemas.sql')
+//       }
+//       {
+//         name: 'SQL_create_achilles_schema'
+//         value: loadTextContent('sql/create_achilles_schema.sql')
+//       }
+//       {
+//         name: 'SQL_add_omop_source'
+//         value: loadTextContent('sql/add_omop_source.sql')
+//       }
+//     ]
+//     scriptContent: loadTextContent('scripts/create_omop_cdm.sh')
+//     supportingScriptUris: [
+//       'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_ddl.sql'
+//       'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_constraints.sql'
+//       'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_primary_keys.sql'
+//       'https://raw.githubusercontent.com/OHDSI/CommonDataModel/main/inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_indices.sql'
+//     ]
+//     cleanupPreference: 'OnExpiration'
+//     retentionInterval: 'PT1H'
+//     containerSettings: {
+//       containerGroupName: 'deployment-omop-cdm'
+//     }
+//   }
+// }
+
+output postgresOMOPCDMUsername string = postgresOMOPCDMUsername

@@ -12,13 +12,24 @@ param postgresWebapiAppSecret string
 @secure()
 param postgresWebapiAdminSecret string
 param logAnalyticsWorkspaceId string
+param webAppVirtualSubnetId string
+param webAppOutboundVirtualSubnetId string
+param privateDNSZoneAzurewebsitesID string
+param appRegistrationClientId string
+@secure()
+param appRegistrationClientSecret string
 
 var dockerRegistryServer = 'https://index.docker.io/v1'
 var dockerImageName = 'ohdsi/webapi'
-var dockerImageTag = '2.12.1'
+var dockerImageTag = '2.13.0'
 var flywayBaselineVersion = '2.2.5.20180212152023'
 var tenantId = subscription().tenantId
 var logCategories = ['AppServiceAppLogs', 'AppServiceConsoleLogs', 'AppServiceHTTPLogs']
+var atlasWebUIUrl = 'https://app-ohdsiatlas-${suffix}.azurewebsites.net/atlas'
+var atlasWebAPIUrl = 'https://app-ohdsiwebapi-${suffix}.azurewebsites.net/WebAPI'
+var atlasWelcomeUrl = '${atlasWebUIUrl}/#/welcome'
+var atlasWebAPICallbackUrl = '${atlasWebAPIUrl}/user/oauth/callback'
+var loginUrl = environment().authentication.loginEndpoint
 
 // Get the keyvault
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
@@ -220,8 +231,39 @@ resource webApp 'Microsoft.Web/sites@2022-03-01' = {
           name: 'WEBSITES_PORT'
           value: '8080'
         }
+        {
+          name: 'security.oid.clientId'
+          value: appRegistrationClientId
+          // value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=${appRegistrationClientId})'
+        }
+        {
+          name: 'security.oid.apiSecret'
+          // value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=${appRegistrationClientSecret})'
+          value: appRegistrationClientSecret
+        }
+        {
+          name: 'security.oid.url'
+          value: '${loginUrl}${tenantId}/v2.0/.well-known/openid-configuration'
+        }
+        {
+          name: 'security.oauth.callback.api'
+          value: atlasWebAPICallbackUrl
+        }
+        {
+          name: 'security.oauth.callback.ui'
+          value: atlasWelcomeUrl
+        }
+        {
+          name: 'security.oid.redirectUrl'
+          value: atlasWelcomeUrl
+        }
+        {
+          name: 'security.oid.logoutUrl'
+          value: atlasWelcomeUrl
+        }               
       ]
     }
+    virtualNetworkSubnetId: webAppOutboundVirtualSubnetId
   }
   identity: {
     type: 'UserAssigned'
@@ -244,6 +286,43 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
         enabled: true
       }
     }]
+  }
+}
+
+// Assign the private endpoit to the PostgreSQL server
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-07-01' = {
+  name: 'pe-${webApp.name}'
+  location: location
+  properties: {
+    subnet: {
+      id: webAppVirtualSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'pe-${webApp.name}'
+        properties: {
+          privateLinkServiceId: webApp.id
+          groupIds: [
+            'sites'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2021-03-01' = {
+  parent: privateEndpoint
+  name: 'privateDnsZoneGroup'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'dns-zone-group-${webApp.name}'
+        properties: {
+          privateDnsZoneId: privateDNSZoneAzurewebsitesID
+        }
+      }
+    ]
   }
 }
 
